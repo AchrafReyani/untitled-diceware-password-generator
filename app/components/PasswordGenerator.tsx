@@ -3,10 +3,13 @@
 import { useState, useEffect } from 'react';
 import { languageWordLists } from '@/app/lib/LanguageData';
 
+// Define a type for the languageWordLists
+type LanguageWordLists = Record<string, Record<string, string>>;
+
 const DICE_SIDES = 6;
 
 function getSecureRandom(max: number): number {
-  const cryptoObj = window.crypto || (window as any).msCrypto;
+  const cryptoObj = window.crypto || (window as { crypto: Crypto }).crypto; // Fix typing for crypto
   const rand = new Uint32Array(1);
   let result: number;
   const skip = 0x7fffffff - (0x7fffffff % max);
@@ -29,15 +32,15 @@ function rollDice(numRolls: number): string {
 
 // Function to generate words from selected languages
 function generateWords(selectedLanguages: string[], numWords: number): string[] {
-  const words = [];
+  const words: string[] = [];
 
   for (let i = 0; i < numWords; i++) {
     // Roll for language first
     const language = selectedLanguages[getSecureRandom(selectedLanguages.length)];
     // Roll for word within that language
     const roll = rollDice(5); // Diceware standard: 5 rolls
-    const word = languageWordLists[language][roll];
-    
+    const word = (languageWordLists as LanguageWordLists)[language][roll]; // Type assertion
+
     if (word) {
       words.push(word);
     } else {
