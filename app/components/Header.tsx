@@ -9,7 +9,7 @@ const Header: React.FC = () => {
         <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
           Untitled Diceware Password Generator
         </h1>
-        <p className="mt-2 text-lg sm:text-xl">Generate secure, random passwords with ease</p>
+        <p className="mt-2 text-lg sm:text-xl">Generate secure, random passwords with ease. Fully client side.</p>
       </div>
     </header>
   );

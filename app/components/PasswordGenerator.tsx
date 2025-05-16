@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { languageWordLists } from '@/app/lib/LanguageData';
+import { ToggleState } from './ToggleButtonList';
 
 // Define a type for the languageWordLists
 type LanguageWordLists = Record<string, Record<string, string>>;
@@ -9,7 +10,7 @@ type LanguageWordLists = Record<string, Record<string, string>>;
 const DICE_SIDES = 6;
 
 function getSecureRandom(max: number): number {
-  const cryptoObj = window.crypto || (window as { crypto: Crypto }).crypto; // Fix typing for crypto
+  const cryptoObj = window.crypto || (window as { crypto: Crypto }).crypto;
   const rand = new Uint32Array(1);
   let result: number;
   const skip = 0x7fffffff - (0x7fffffff % max);
@@ -30,21 +31,51 @@ function rollDice(numRolls: number): string {
   return result;
 }
 
+interface ToggleOptions {
+  capitalizeRandomLetters: boolean;
+  includeNumbers: boolean;
+}
+
+// Function to apply toggles to a word
+function applyToggles(word: string, toggles: ToggleOptions): string {
+  let transformed = word;
+
+  if (toggles.capitalizeRandomLetters && word.length > 0) {
+    const index = getSecureRandom(word.length);
+    transformed =
+      word.slice(0, index) +
+      word.charAt(index).toUpperCase() +
+      word.slice(index + 1);
+  }
+
+  if (toggles.includeNumbers) {
+    const number = getSecureRandom(10).toString();
+    const insertIndex = getSecureRandom(word.length + 1);
+    transformed =
+      transformed.slice(0, insertIndex) + number + transformed.slice(insertIndex);
+  }
+
+  return transformed;
+}
+
 // Function to generate words from selected languages
-function generateWords(selectedLanguages: string[], numWords: number): string[] {
+function generateWords(
+  selectedLanguages: string[],
+  numWords: number,
+  toggles: ToggleState
+): string[] {
   const words: string[] = [];
 
   for (let i = 0; i < numWords; i++) {
-    // Roll for language first
     const language = selectedLanguages[getSecureRandom(selectedLanguages.length)];
-    // Roll for word within that language
-    const roll = rollDice(5); // Diceware standard: 5 rolls
-    const word = (languageWordLists as LanguageWordLists)[language][roll]; // Type assertion
+    const roll = rollDice(5);
+    const rawWord = (languageWordLists as LanguageWordLists)[language][roll];
 
-    if (word) {
-      words.push(word);
+    if (rawWord) {
+      const finalWord = applyToggles(rawWord, toggles);
+      words.push(finalWord);
     } else {
-      i--; // Try again if invalid roll
+      i--; // retry on invalid roll
     }
   }
 
@@ -54,17 +85,22 @@ function generateWords(selectedLanguages: string[], numWords: number): string[] 
 interface PasswordGeneratorProps {
   wordCount: number;
   selectedLanguages: string[];
+  toggles: ToggleOptions;
 }
 
-export default function PasswordGenerator({ wordCount, selectedLanguages }: PasswordGeneratorProps) {
+export default function PasswordGenerator({
+  wordCount,
+  selectedLanguages,
+  toggles
+}: PasswordGeneratorProps) {
   const [words, setWords] = useState<string[]>([]);
 
   useEffect(() => {
     if (selectedLanguages.length > 0) {
-      const newWords = generateWords(selectedLanguages, wordCount);
+      const newWords = generateWords(selectedLanguages, wordCount, toggles);
       setWords(newWords);
     }
-  }, [wordCount, selectedLanguages]);
+  }, [wordCount, selectedLanguages, toggles]);
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);

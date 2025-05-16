@@ -1,6 +1,6 @@
 # Untitled Diceware Password Generator
 
-## Getting Started
+## Run locally
 
 ```npm install```
 
