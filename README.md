@@ -4,6 +4,9 @@ A modern, minimal, and fully client-side Diceware password generator built with 
 
 Inspired by [grempe/diceware](https://github.com/grempe/diceware), which in turn was inspired by [yesiamben/diceware](https://github.com/yesiamben/diceware). This project was created as a way to learn full-stack development while rethinking the UX and structure with a modern React-based stack.
 
+
+![App Screenshot](public/screenshot.png)
+
 ---
 
 ## 🌟 Features
